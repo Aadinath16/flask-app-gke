@@ -7,7 +7,7 @@ metadata:
 
 
 spec:
-  replicas: 2
+  replicas: 1
 
 
   strategy:
@@ -42,7 +42,7 @@ spec:
       # ================================
       - name: flask-app
 
-        image: gcr.io/PROJECT_ID/flask-poc:IMAGE_TAG
+        image: us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo/flask-app:1.0.0-dev-5-fccf003
 
         imagePullPolicy: Always
 
@@ -86,11 +86,11 @@ spec:
 
         resources:
           requests:
-            cpu: "250m"
+            cpu: "100m"
             memory: "256Mi"
           limits:
-            cpu: "500m"
-            memory: "512Mi"
+            cpu: "250m"
+            memory: "300Mi"
 
 
       # ================================
@@ -98,11 +98,11 @@ spec:
       # ================================
       - name: cloud-sql-proxy
 
-        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.0
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.21.0
         args:
           - "--structured-logs"
           - "--port=3306"
-          - "PROJECT_ID:REGION:INSTANCE_NAME"
+          - "gcp-test-1618-dev:us-central1:flask-sql-instance"
 
 
         securityContext:
