@@ -1,0 +1,62 @@
+name : flask-gke-poc
+
+on:
+    push:
+        branches: 
+            - dev
+            - feature-1
+    pull_request:
+        branches:
+            - main
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  GAR_LOCATION: us
+  REPO_NAME: flask-app-repo
+  IMAGE_NAME: flask-app
+  CLUSTER_NAME: gke
+  CLUSTER_LOCATION: us-central1-c
+    
+jobs:
+    build:
+        name: Image Build & Push
+        runs-on: ubuntu-latest
+        
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v3
+
+            - name: Set up gcloud
+              uses: google-github-actions/setup-gcloud@v2
+              with:
+                project_id: ${{ env.PROJECT_ID }}
+                service_account_key: ${{ secrets.GCP_SA_KEY }}
+                export_default_credentials: true
+
+            - name: Authenticate with Google Cloud
+              uses: google-github-actions/auth@v2
+              with:
+                credentials_json: '${{ secrets.GCP_SA_KEY }}'
+            
+            - name: Configure Artifact Registry
+              run: |
+                gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+            
+            - name: Set environment variables
+              id: set-env
+              run: |
+                if [[ "${GITHUB_REF_NAME}" == "main" ]]; then
+                    echo "environment=prod" >> $GITHUB_OUTPUT
+                    echo "image_tag=1.0.0-${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+                else
+                    echo "environment=dev" >> $GITHUB_OUTPUT
+                    echo "image_tag=1.0.0-dev-${GITHUB_RUN_NUMBER}-${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+                fi
+            - name: Build docker image
+              run: |
+                docker build -t ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ steps.set-env.outputs.image_tag }} .
+
+            - name: Push Docker image
+              run: |
+                docker push ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPO_NAME }}/${{ env.IMAGE_NAME }}:${{ steps.set-env.outputs.image_tag }}
+              # us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo
