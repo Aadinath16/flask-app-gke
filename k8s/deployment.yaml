@@ -1,0 +1,128 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: flask-app
+  namespace: flask-poc
+
+
+spec:
+  replicas: 2
+
+
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+
+  selector:
+    matchLabels:
+      app: flask-app
+
+
+  template:
+
+    metadata:
+      labels:
+        app: flask-app
+
+
+    spec:
+
+      # Workload Identity KSA
+      serviceAccountName: flask-ksa
+
+
+      containers:
+
+      # ================================
+      # Flask Application
+      # ================================
+      - name: flask-app
+
+        image: gcr.io/PROJECT_ID/flask-poc:IMAGE_TAG
+
+        imagePullPolicy: Always
+
+
+        ports:
+        - containerPort: 8080
+
+
+        # Load env from ConfigMap + Secret
+        envFrom:
+
+        - configMapRef:
+            name: flask-config
+
+        - secretRef:
+            name: flask-secret
+
+
+        # Volume Mount
+        volumeMounts:
+        - name: app-volume
+          mountPath: /data
+
+
+        # Health Checks
+        readinessProbe:
+          httpGet:
+            path: /api/metrics/200
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 10
+
+
+        livenessProbe:
+          httpGet:
+            path: /api/metrics/200
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 20
+
+
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "256Mi"
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+
+
+      # ================================
+      # Cloud SQL Auth Proxy (Sidecar)
+      # ================================
+      - name: cloud-sql-proxy
+
+        image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.6.0
+        args:
+          - "--structured-logs"
+          - "--port=3306"
+          - "PROJECT_ID:REGION:INSTANCE_NAME"
+
+
+        securityContext:
+          runAsNonRoot: true
+
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+          limits:
+            cpu: "200m"
+            memory: "256Mi"
+
+
+      # ================================
+      # Volumes
+      # ================================
+      volumes:
+
+      - name: app-volume
+        persistentVolumeClaim:
+          claimName: flask-pvc
