@@ -7,10 +7,10 @@ from flask import send_from_directory
 
 from app.config import get_config
 
-# from app.routes.data import data_bp
+from app.routes.data import data_bp
 from app.routes.query import query_bp
 from app.routes.metrics import metrics_bp
-# from app.routes.volume import volume_bp
+from app.routes.volume import volume_bp
 from app.logger import setup_logger
 
 
@@ -24,8 +24,8 @@ def create_app():
     # Setup logging
     app.logger = setup_logger()
     # Initialize database (auto-create tables)
-    # with app.app_context():
-    #     init_db()
+    with app.app_context():
+        init_db()
 
 
 
@@ -34,14 +34,14 @@ def create_app():
     PrometheusMetrics(app)
 
     # Register routes
-    # app.register_blueprint(data_bp)
+    app.register_blueprint(data_bp)
     app.register_blueprint(query_bp)
     app.register_blueprint(metrics_bp)
-    # app.register_blueprint(volume_bp)
+    app.register_blueprint(volume_bp)
 
-    @app.route("/")
-    def ui():
-        return send_from_directory("static", "index.html")
+    # @app.route("/")
+    # def ui():
+    #     return send_from_directory("static", "index.html")
 
     # Health
     @app.route("/health")

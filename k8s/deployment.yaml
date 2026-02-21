@@ -42,7 +42,7 @@ spec:
       # ================================
       - name: flask-app
 
-        image: us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo/flask-app:1.0.0-dev-6-18e6220
+        image: us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo/flask-app:1.0.0-dev-7-f42c0e9
 
         imagePullPolicy: Always
 
@@ -84,13 +84,13 @@ spec:
           periodSeconds: 20
 
 
-        resources:
-          requests:
-            cpu: "100m"
-            memory: "256Mi"
-          limits:
-            cpu: "250m"
-            memory: "300Mi"
+        # resources:
+        #   requests:
+        #     cpu: "100m"
+        #     memory: "256Mi"
+        #   limits:
+        #     cpu: "250m"
+        #     memory: "300Mi"
 
 
       # ================================
@@ -102,7 +102,7 @@ spec:
         args:
           - "--structured-logs"
           - "--port=3306"
-          - "gcp-test-1618-dev:us-central1:flask-sql-instance"
+          - "gcp-test-1618-dev:us-central1:gcp-test-1618-sql-dev"
 
 
         securityContext:
