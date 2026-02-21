@@ -1,6 +1,6 @@
 from flask import Flask
 from prometheus_flask_exporter import PrometheusMetrics
-# from app.db import init_db
+from app.db import init_db
 
 from flask import send_from_directory
 

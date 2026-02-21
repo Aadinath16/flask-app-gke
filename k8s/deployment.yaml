@@ -42,7 +42,7 @@ spec:
       # ================================
       - name: flask-app
 
-        image: us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo/flask-app:1.0.0-dev-7-f42c0e9
+        image: us-docker.pkg.dev/gcp-test-1618-dev/flask-app-repo/flask-app:1.0.0-dev-8-b8f6d64
 
         imagePullPolicy: Always
 
@@ -68,20 +68,20 @@ spec:
 
 
         # Health Checks
-        readinessProbe:
-          httpGet:
-            path: /api/metrics/200
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        # readinessProbe:
+        #   httpGet:
+        #     path: /api/metrics/200
+        #     port: 8080
+        #   initialDelaySeconds: 5
+        #   periodSeconds: 10
 
 
-        livenessProbe:
-          httpGet:
-            path: /api/metrics/200
-            port: 8080
-          initialDelaySeconds: 15
-          periodSeconds: 20
+        # livenessProbe:
+        #   httpGet:
+        #     path: /api/metrics/200
+        #     port: 8080
+        #   initialDelaySeconds: 15
+        #   periodSeconds: 20
 
 
         # resources:
